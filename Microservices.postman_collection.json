@@ -1,0 +1,536 @@
+{
+    "info": {
+        "_postman_id": "microservices-arch-001",
+        "name": "Microservices Architecture",
+        "description": "Complete collection for testing GraphQL microservices.\n\n1. Run Register or Login first\n2. Copy the token from response\n3. Paste in AUTH_TOKEN variable\n4. All other requests use it automatically",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "GATEWAY_URL",
+            "value": "http://localhost:4001/graphql"
+        },
+        {
+            "key": "AUTH_TOKEN",
+            "value": "paste-your-token-here"
+        },
+        {
+            "key": "REFRESH_TOKEN",
+            "value": "paste-your-refresh-token-here"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health Checks",
+            "item": [
+                {
+                    "name": "API Gateway Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:4000/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "4000",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GraphQL Gateway Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:4001/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "4001",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Auth Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5001/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Account Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5002/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5002",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "WebSocket Service Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5003/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5003",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Auth Service",
+            "item": [
+                {
+                    "name": "1. Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.register) {",
+                                    "    pm.collectionVariables.set('AUTH_TOKEN', jsonData.data.register.token);",
+                                    "    pm.collectionVariables.set('REFRESH_TOKEN', jsonData.data.register.refreshToken);",
+                                    "    console.log('Token saved!');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { register(input: { email: \\\"john@example.com\\\", password: \\\"password123\\\" }) { token refreshToken user { id email role isActive createdAt } } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.login) {",
+                                    "    pm.collectionVariables.set('AUTH_TOKEN', jsonData.data.login.token);",
+                                    "    pm.collectionVariables.set('REFRESH_TOKEN', jsonData.data.login.refreshToken);",
+                                    "    console.log('Token saved!');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { login(input: { email: \\\"john@example.com\\\", password: \\\"password123\\\" }) { token refreshToken user { id email role isActive lastLogin createdAt } } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Get Current User (me)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{AUTH_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"query { me { id email role isActive lastLogin createdAt updatedAt } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Verify Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"query { verifyToken(token: \\\"{{AUTH_TOKEN}}\\\") { id email role isActive } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5. Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.refreshToken) {",
+                                    "    pm.collectionVariables.set('AUTH_TOKEN', jsonData.data.refreshToken.token);",
+                                    "    pm.collectionVariables.set('REFRESH_TOKEN', jsonData.data.refreshToken.refreshToken);",
+                                    "    console.log('New tokens saved!');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { refreshToken(refreshToken: \\\"{{REFRESH_TOKEN}}\\\") { token refreshToken user { id email role } } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6. Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{AUTH_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { logout { success message } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Account Service",
+            "item": [
+                {
+                    "name": "1. Get My Profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{AUTH_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"query { myProfile { id userId email firstName lastName fullName avatar bio phone address { street city state country zipCode } preferences { language theme notifications } isOnline lastSeen createdAt updatedAt } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2. Update My Profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{AUTH_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { updateProfile(input: { firstName: \\\"John\\\", lastName: \\\"Doe\\\", bio: \\\"Learning microservices!\\\", phone: \\\"+91-9876543210\\\", preferences: { theme: \\\"dark\\\" } }) { id firstName lastName fullName bio phone preferences { theme language } updatedAt } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Get All Profiles",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"query { getAllProfiles(limit: 10, offset: 0) { id userId email firstName lastName fullName avatar isOnline createdAt } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Delete My Profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{AUTH_TOKEN}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { deleteProfile { success message } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{GATEWAY_URL}}",
+                            "host": [
+                                "{{GATEWAY_URL}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Direct Service Calls",
+            "item": [
+                {
+                    "name": "Auth Direct - Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"mutation { register(input: { email: \\\"direct@test.com\\\", password: \\\"password123\\\" }) { token user { id email } } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/graphql",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "graphql"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Account Direct - Get All Profiles",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"query { getAllProfiles(limit: 10) { id email firstName lastName } }\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://localhost:5002/graphql",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5002",
+                            "path": [
+                                "graphql"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
